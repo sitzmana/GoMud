@@ -1,4 +1,4 @@
-package modules
+package leaderboards
 
 import (
 	"embed"
@@ -24,8 +24,8 @@ var (
 	// It embeds the relative path into the var below it.
 	//////////////////////////////////////////////////////////////////////
 
-	//go:embed leaderboards/*
-	leaderboard_Files embed.FS // All vars must be a unique name since the module package/namespace is shared between modules.
+	//go:embed files/*
+	files embed.FS
 )
 
 // ////////////////////////////////////////////////////////////////////
@@ -36,7 +36,6 @@ var (
 // program starts running.
 // ////////////////////////////////////////////////////////////////////
 func init() {
-
 	//
 	// We can use all functions only, but this demonstrates
 	// how to use a struct
@@ -48,7 +47,7 @@ func init() {
 	//
 	// Add the embedded filesystem
 	//
-	if err := t.plug.AttachFileSystem(leaderboard_Files); err != nil {
+	if err := t.plug.AttachFileSystem(files); err != nil {
 		panic(err)
 	}
 	//
