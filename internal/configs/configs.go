@@ -49,8 +49,8 @@ type Config struct {
 	Validation   Validation   `yaml:"Validation"`
 	Roles        Roles        `yaml:"Roles"`
 	// Plugins is a special case
-	Modules Modules `yaml:"Modules"`
-
+	Modules   Modules `yaml:"Modules"`
+	EnableAPI bool    `yaml:EnableAPI`
 	// End config subsections
 
 	seedInt int64 `yaml:"-"`

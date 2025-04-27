@@ -259,7 +259,7 @@ func Listen(wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
 	})
 
 	http.Handle("GET /admin/static/", RunWithMUDLocked(
-		doBasicAuth(
+		DoBasicAuth(
 			handlerToHandlerFunc(
 				http.StripPrefix("/admin/static/", http.FileServer(http.Dir(configs.GetFilePathsConfig().AdminHtml.String()+"/static"))),
 			),
@@ -268,47 +268,47 @@ func Listen(wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
 
 	// Admin tools
 	http.HandleFunc("GET /admin/", RunWithMUDLocked(
-		doBasicAuth(adminIndex),
+		DoBasicAuth(adminIndex),
 	))
 
 	// Item Admin
 	http.HandleFunc("GET /admin/items/", RunWithMUDLocked(
-		doBasicAuth(itemsIndex),
+		DoBasicAuth(itemsIndex),
 	))
 	http.HandleFunc("GET /admin/items/itemdata/", RunWithMUDLocked(
-		doBasicAuth(itemData),
+		DoBasicAuth(itemData),
 	))
 
 	// Race Admin
 	http.HandleFunc("GET /admin/races/", RunWithMUDLocked(
-		doBasicAuth(racesIndex)),
+		DoBasicAuth(racesIndex)),
 	)
 	http.HandleFunc("GET /admin/races/racedata/", RunWithMUDLocked(
-		doBasicAuth(raceData)),
+		DoBasicAuth(raceData)),
 	)
 
 	// Mob Admin
 	http.HandleFunc("GET /admin/mobs/", RunWithMUDLocked(
-		doBasicAuth(mobsIndex),
+		DoBasicAuth(mobsIndex),
 	))
 	http.HandleFunc("GET /admin/mobs/mobdata/", RunWithMUDLocked(
-		doBasicAuth(mobData),
+		DoBasicAuth(mobData),
 	))
 
 	// Mutator Admin
 	http.HandleFunc("GET /admin/mutators/", RunWithMUDLocked(
-		doBasicAuth(mutatorsIndex),
+		DoBasicAuth(mutatorsIndex),
 	))
 	http.HandleFunc("GET /admin/mutators/mutatordata/", RunWithMUDLocked(
-		doBasicAuth(mutatorData),
+		DoBasicAuth(mutatorData),
 	))
 
 	// Room Admin
 	http.HandleFunc("GET /admin/rooms/", RunWithMUDLocked(
-		doBasicAuth(roomsIndex),
+		DoBasicAuth(roomsIndex),
 	))
 	http.HandleFunc("GET /admin/rooms/roomdata/", RunWithMUDLocked(
-		doBasicAuth(roomData),
+		DoBasicAuth(roomData),
 	))
 
 	//

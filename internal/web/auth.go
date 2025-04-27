@@ -18,7 +18,7 @@ func handlerToHandlerFunc(h http.Handler) http.HandlerFunc {
 	}
 }
 
-func doBasicAuth(next http.HandlerFunc) http.HandlerFunc {
+func DoBasicAuth(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 		authHeader := r.Header.Get("Authorization")
