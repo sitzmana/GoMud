@@ -69,15 +69,15 @@ type Mob struct {
 	CombatCommands  []string `yaml:"combatcommands,omitempty"` // Commands they may do while in combat
 	Character       characters.Character
 	MaxWander       int      `yaml:"maxwander,omitempty"`       // Max rooms to wander from home
-	GoingHome       bool     `yaml:"-"`                         // WHether they are trying to get home
-	RoomStack       []int    `yaml:"-"`                         // Stack of rooms to get back home
+	WanderCount     int      `yaml:"-"`                         // How many times this mob has wandered
 	PreventIdle     bool     `yaml:"-"`                         // Whether they can't possibly be idle
 	ScriptTag       string   `yaml:"scripttag"`                 // Script for this mob: mobs/frostfang/scripts/{mobId}-{mobname}-{ScriptTag}.js
 	QuestFlags      []string `yaml:"questflags,omitempty,flow"` // What quest flags are set on this mob?
 	BuffIds         []int    `yaml:"buffids,omitempty"`         // Buff Id's this mob always has upon spawn
 	tempDataStore   map[string]any
-	conversationId  int  // Identifier of conversation currently involved in.
-	hasConverseFile bool // whether they have a converse file to look for conversations in
+	conversationId  int       // Identifier of conversation currently involved in.
+	hasConverseFile bool      // whether they have a converse file to look for conversations in
+	Path            PathQueue `yaml:"-"` // a pre-calculated path the mob is following.
 }
 
 func MobInstanceExists(instanceId int) bool {
