@@ -114,6 +114,7 @@ func updateItemByIDHandler(w http.ResponseWriter, r *http.Request) {
 
 // executeAdminCommandHandler handles POST /api/commands to run an admin command
 func executeAdminCommandHandler(w http.ResponseWriter, r *http.Request) {
+	// TODO: add admin verification
 	// Parse JSON body: {"command": "<admin command string>"}
 	var req struct {
 		Command string `json:"command"`
