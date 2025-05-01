@@ -388,7 +388,7 @@ Network:
   # - HttpPort -
   #   The port the server listens on for web requests
   #   0 (zero) means none.
-  HttpPort: 8080
+  HttpPort: 80
   # - HttpsPort -
   #   The port the server listens on for web requests
   #   Note: Must have a cert/key file (See FilePaths)
