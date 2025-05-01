@@ -22,6 +22,8 @@ exits:
     roomid: 155
   west:
     roomid: 145
+items:
+- itemid: 5
 gold: 125
 spawninfo:
 - mobid: 13

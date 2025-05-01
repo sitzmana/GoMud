@@ -17,10 +17,8 @@ import (
 	"time"
 
 	"github.com/GoMudEngine/GoMud/internal/configs"
-	"github.com/GoMudEngine/GoMud/internal/events"
 	"github.com/GoMudEngine/GoMud/internal/mudlog"
 	"github.com/GoMudEngine/GoMud/internal/rooms"
-	"github.com/GoMudEngine/GoMud/internal/usercommands"
 	"github.com/GoMudEngine/GoMud/internal/users"
 	"github.com/GoMudEngine/GoMud/internal/util"
 	"github.com/gorilla/websocket"
@@ -473,7 +471,7 @@ func adminPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	cmdName := parts[1]
-
+	http.Error(w, cmdName, http.StatusBadRequest)
 	// Parse JSON body for arguments
 	var args map[string]interface{}
 	if err := json.NewDecoder(r.Body).Decode(&args); err != nil {
@@ -502,7 +500,6 @@ func adminPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// find the admin user
 	// Determine a user context (use first active user)
 	active := users.GetAllActiveUsers()
 	var userCtx *users.UserRecord
@@ -515,8 +512,16 @@ func adminPostHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Extract command payload
+	var rest string
+	if restRaw, ok := args["rest"]; ok {
+		rest = restRaw.(string)
+	} else {
+		rest = ""
+	}
+
 	// Execute the admin command
-	handled, err := usercommands.Command(cmdName, userCtx, roomCtx, events.EventFlag(0))
+	handled, err := executeAdminCommand(cmdName, userCtx, roomCtx, rest)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
