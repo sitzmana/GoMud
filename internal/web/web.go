@@ -3,6 +3,7 @@ package web
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"log"
 	"log/slog"
@@ -16,7 +17,11 @@ import (
 	"time"
 
 	"github.com/GoMudEngine/GoMud/internal/configs"
+	"github.com/GoMudEngine/GoMud/internal/events"
 	"github.com/GoMudEngine/GoMud/internal/mudlog"
+	"github.com/GoMudEngine/GoMud/internal/rooms"
+	"github.com/GoMudEngine/GoMud/internal/usercommands"
+	"github.com/GoMudEngine/GoMud/internal/users"
 	"github.com/GoMudEngine/GoMud/internal/util"
 	"github.com/gorilla/websocket"
 )
@@ -311,6 +316,11 @@ func Listen(wg *sync.WaitGroup, webSocketHandler func(*websocket.Conn)) {
 		doBasicAuth(roomData),
 	))
 
+	// Admin command execution endpoint
+	http.Handle("POST /admin/", RunWithMUDLocked(
+		doBasicAuth(http.HandlerFunc(adminPostHandler)),
+	))
+
 	//
 	// Https server start up
 	//
@@ -452,4 +462,74 @@ func sendError(w http.ResponseWriter, r *http.Request, status int) {
 	if status == http.StatusNotFound {
 		fmt.Fprint(w, "custom 404")
 	}
+}
+
+// adminPostHandler handles POST /admin/{command}
+func adminPostHandler(w http.ResponseWriter, r *http.Request) {
+	// Extract command from URL path: /admin/{command}
+	parts := strings.Split(strings.Trim(r.URL.Path, "/"), "/")
+	if len(parts) < 2 {
+		http.Error(w, "Invalid admin command path", http.StatusBadRequest)
+		return
+	}
+	cmdName := parts[1]
+
+	// Parse JSON body for arguments
+	var args map[string]interface{}
+	if err := json.NewDecoder(r.Body).Decode(&args); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+
+	// Determine room context based on JSON or default to room 0
+	var roomID int
+	if ridRaw, ok := args["room_id"]; ok {
+		// JSON numbers decode as float64
+		if ridFloat, ok2 := ridRaw.(float64); ok2 {
+			roomID = int(ridFloat)
+			// remove room_id from args to avoid passing through
+			delete(args, "room_id")
+		} else {
+			http.Error(w, "Invalid room_id", http.StatusBadRequest)
+			return
+		}
+	} else {
+		roomID = 0
+	}
+	roomCtx := rooms.LoadRoom(roomID)
+	if roomCtx == nil {
+		http.Error(w, "Invalid room_id", http.StatusBadRequest)
+		return
+	}
+
+	// find the admin user
+	// Determine a user context (use first active user)
+	active := users.GetAllActiveUsers()
+	var userCtx *users.UserRecord
+	if len(active) > 0 {
+		userCtx = active[0]
+	}
+	// Ensure we have a valid user context
+	if userCtx == nil {
+		http.Error(w, "No active user available to execute command", http.StatusInternalServerError)
+		return
+	}
+
+	// Execute the admin command
+	handled, err := usercommands.Command(cmdName, userCtx, roomCtx, events.EventFlag(0))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if !handled {
+		http.Error(w, "Command not handled", http.StatusBadRequest)
+		return
+	}
+
+	// Respond with execution details
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"message": fmt.Sprintf("Executed admin command: %s", cmdName),
+		"args":    args,
+	})
 }
